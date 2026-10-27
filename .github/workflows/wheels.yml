@@ -1,0 +1,94 @@
+name: Build and publish Windows wheels
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }} wheels
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [AMD64, x86]
+    env:
+      OPENSSL_VER: openssl-3.5.7
+      OPENLDAP_VER: openldap-2.4.59
+      VS_PLATFORM: ${{ matrix.arch == 'x86' && 'Win32' || 'x64' }}
+      VS_PLATFORM_TOOLSET: v145
+      VC_VER: "18.0"
+      OPENSSL_CONFIG: ${{ matrix.arch == 'x86' && 'VC-WIN32' || 'VC-WIN64A-masm' }}
+      CIBW_BUILD: "cp36-* cp37-* cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
+      CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
+      CIBW_BEFORE_BUILD_WINDOWS: 'python "{project}\tools\prepare_build.py"'
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: microsoft/setup-msbuild@v3
+        with:
+          msbuild-architecture: ${{ matrix.arch == 'x86' && 'x86' || 'x64' }}
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch == 'x86' && 'amd64_x86' || 'amd64' }}
+
+      - uses: ilammy/setup-nasm@v1
+        if: matrix.arch == 'x86'
+
+      - name: Select python-ldap source version
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME -replace '^v', ''
+          "VERSION=$version" >> $env:GITHUB_ENV
+          "PYTHONLDAP_VER=python-ldap-$version" >> $env:GITHUB_ENV
+
+      - name: Build OpenSSL
+        run: .\build_openssl.cmd
+        shell: cmd
+
+      - name: Build OpenLDAP
+        run: .\build_openldap.cmd
+        shell: cmd
+
+      - name: Download python-ldap source
+        run: .\build_python-ldap.cmd
+        shell: cmd
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.23.3
+        env:
+          CIBW_ARCHS_WINDOWS: ${{ matrix.arch }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheels-${{ matrix.arch }}
+          path: wheelhouse/*.whl
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: wheels-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Publish wheels
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: python-ldap ${{ github.ref_name }} Windows wheels
+          body: Windows CPython wheels for python-ldap ${{ github.ref_name }}. Includes win32 and win_amd64 builds.
+          files: release-assets/*.whl
+          fail_on_unmatched_files: true
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

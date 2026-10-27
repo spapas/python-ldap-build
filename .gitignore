@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+/build/
+/dist/
+/wheelhouse/
+*.tgz
+*.tar.gz
+*.tar
+*.zip
+/openssl-*/
+/openldap-*/
