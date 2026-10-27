@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import subprocess
 import sys
 from pathlib import Path
@@ -29,7 +27,7 @@ def main() -> None:
                 + "  version = pkginfo.__version__,\n"
                 + "  packages = find_packages('Lib'),\n"
                 + "  package_dir = {'': 'Lib'},\n"
-                + "  py_modules = ['ldapurl', 'ldif', '_ldap'],\n"
+                + "  py_modules = ['ldapurl', 'ldif'],\n"
                 + "  install_requires = ['pyasn1>=0.3.7', 'pyasn1_modules>=0.1.5'],\n"
                 + "  python_requires = '>=3.6',\n"
                 + "  include_package_data = True,\n"
