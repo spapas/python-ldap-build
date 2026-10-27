@@ -1,9 +1,11 @@
 # python-ldap Windows wheels
 
-This repository builds and publishes Windows wheels for the upstream
-[python-ldap](https://github.com/python-ldap/python-ldap) releases. Push a
-`vX.Y.Z` tag to build the upstream `python-ldap-X.Y.Z` source and publish all
-Windows wheels to this repository's GitHub Release.
+This repository is based on Christoph Gohlke's original
+[python-ldap-build](https://github.com/cgohlke/python-ldap-build) project.
+It is maintained separately so I can build and publish new
+[python-ldap](https://github.com/python-ldap/python-ldap) releases whenever I
+choose. Push a `vX.Y.Z` tag to build the upstream `python-ldap-X.Y.Z` source
+and publish all Windows wheels to this repository's GitHub Release.
 
 The workflow builds CPython 3.11 through 3.14 for both 32-bit (`win32`) and
 64-bit (`win_amd64`). For example, the Python 3.12 64-bit wheel is installed
