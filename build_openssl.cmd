@@ -33,9 +33,6 @@ if errorlevel 1 exit /B 1
 nmake /nologo install_dev
 if errorlevel 1 exit /B 1
 
-nmake /nologo install_ssldirs
-if errorlevel 1 exit /B 1
-
 cd ..
 
 endlocal
