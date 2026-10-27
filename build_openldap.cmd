@@ -11,7 +11,7 @@ if errorlevel 1 exit /B 1
 tar -xf %OPENLDAP_VER%.tgz
 if errorlevel 1 exit /B 1
 
-git apply -p1 --verbose --directory=%OPENLDAP_VER% openldap.diff
+git apply --ignore-space-change -p1 --verbose --directory=%OPENLDAP_VER% openldap.diff
 if errorlevel 1 exit /B 1
 
 cd %OPENLDAP_VER%
